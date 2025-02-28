@@ -13,7 +13,7 @@ class TestHTMLNode(unittest.TestCase):
     """
 
     def test_eq(self):
-        """This test creates two HTMLNode objects with the same properties
+        """This test creates two HTMLNode objects with the same data
         and asserts that they are equal."""
         child_node = HTMLNode()
         node = HTMLNode(
@@ -32,14 +32,14 @@ class TestHTMLNode(unittest.TestCase):
         self.assertNotEqual(node, node2)
 
     def test_value_not_eq(self):
-        """This test creates two HTMLNode objects with different tags and
+        """This test creates two HTMLNode objects with different values and
         asserts that they are not equal"""
         node = HTMLNode("p", "Random text")
         node2 = HTMLNode("p", "Curated text")
         self.assertNotEqual(node, node2)
 
     def test_children_not_eq(self):
-        """This test creates two HTMLNode objects with different tags and
+        """This test creates two HTMLNode objects with different children and
         asserts that they are not equal"""
         child_node = HTMLNode()
         node = HTMLNode("p", "Random text", [child_node])
@@ -47,7 +47,7 @@ class TestHTMLNode(unittest.TestCase):
         self.assertNotEqual(node, node2)
 
     def test_props_not_eq(self):
-        """This test creates two HTMLNode objects with different tags and
+        """This test creates two HTMLNode objects with different properties and
         asserts that they are not equal"""
         child_node = HTMLNode()
         node = HTMLNode(
