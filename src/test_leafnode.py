@@ -27,7 +27,7 @@ class TestLeafNode(unittest.TestCase):
         self.assertNotEqual(node, node2)
 
     def test_value_not_eq(self):
-        """This test creates two LeafNode objects with different tags and
+        """This test creates two LeafNode objects with different values and
         asserts that they are not equal"""
         node = LeafNode("p", "Random text")
         node2 = LeafNode("p", "Curated text")
