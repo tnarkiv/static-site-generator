@@ -10,7 +10,7 @@ class TextType(Enum):
         Enum (Enum): base class Enum
     """
 
-    NORMAL = "normal"
+    TEXT = "text"
     BOLD = "bold"
     ITALICS = "italic"
     CODE = "code"
