@@ -3,7 +3,14 @@
 import unittest
 
 from textnode import TextNode, TextType
-from utils import extract_markdown_images, extract_markdown_links, split_nodes_delimiter
+from utils import (
+    extract_markdown_images,
+    extract_markdown_links,
+    split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+)
+
 
 class TestUtils(unittest.TestCase):
     """This is the class file containing the test cases for the Utils file"""
@@ -20,7 +27,6 @@ class TestUtils(unittest.TestCase):
         ]
         self.assertEqual(processed_node_list, expected_nodes)
 
-
     def test_italic_text(self):
         """Tests whether italic text nodes are processed correctly"""
         node = TextNode("This is _italic_ text", TextType.TEXT)
@@ -33,7 +39,6 @@ class TestUtils(unittest.TestCase):
         ]
         self.assertEqual(processed_node_list, expected_nodes)
 
-
     def test_code_text(self):
         """Tests whether inline code text nodes are processed correctly"""
         node = TextNode("This is `code` text", TextType.TEXT)
@@ -45,7 +50,6 @@ class TestUtils(unittest.TestCase):
             TextNode(" text", TextType.TEXT),
         ]
         self.assertEqual(processed_node_list, expected_nodes)
-
 
     def test_combined_bold_italic(self):
         """Tests bold and italic text in the same node"""
@@ -60,7 +64,6 @@ class TestUtils(unittest.TestCase):
             TextNode(" text", TextType.TEXT),
         ]
         self.assertEqual(processed_node_list, expected_nodes)
-
 
     def test_combined_bold_code(self):
         """Tests bold and code text in the same node"""
@@ -91,8 +94,8 @@ class TestUtils(unittest.TestCase):
     def test_extract_markdown_images_multiple_image(self):
         """Tests the extract markdown images function with multiple images"""
         matches = extract_markdown_images(
-            "This is text with multiple images:  ![image_one](https://i.imgur.com/zjjcJKZ.png), \
-                ![image_two](https://i.imgur.com/adfCVDe.png)"
+            "This is text with multiple images:  ![image_one](https://i.imgur.com/zjjcJKZ.png), "
+            "![image_two](https://i.imgur.com/adfCVDe.png)"
         )
         self.assertListEqual(
             [
@@ -117,8 +120,8 @@ class TestUtils(unittest.TestCase):
     def test_extract_markdown_links_multiple_links(self):
         """Test the extract markdown links function with multiple link"""
         matches = extract_markdown_links(
-            "This is text with the following links : [google](https://www.google.com),\
-                  [yahoo](https://www.yahoo.com)"
+            "This is text with the following links : [google](https://www.google.com),"
+            "[yahoo](https://www.yahoo.com)"
         )
         self.assertListEqual(
             (
@@ -129,3 +132,45 @@ class TestUtils(unittest.TestCase):
             ),
             matches,
         )
+
+    def test_split_nodes_image(self):
+        """This test case checks the split nodes images function with multiple images"""
+        node_one = TextNode("![alt text](image_url)", TextType.TEXT)
+        node_two = TextNode("This is ![an image](url) in text", TextType.TEXT)
+        node_list = [node_one, node_two]
+
+        processed_nodes = split_nodes_image(node_list)
+        expected_nodes = [
+            TextNode("alt text", TextType.IMAGE, "image_url"),
+            TextNode("This is ", TextType.TEXT),
+            TextNode("an image", TextType.IMAGE, "url"),
+            TextNode(" in text", TextType.TEXT)
+        ]
+        self.assertEqual(processed_nodes, expected_nodes)
+
+    def test_split_nodes_link(self):
+        """This test case checks the split nodes link function with multiple links"""
+        node_one = TextNode("[link text](link_url)", TextType.TEXT)
+        node_two = TextNode("Check this [example](url) out", TextType.TEXT)
+        node_list = [node_one, node_two]
+
+        processed_nodes = split_nodes_link(node_list)
+        expected_nodes = [
+            TextNode("link text", TextType.LINK, "link_url"),
+            TextNode("Check this ", TextType.TEXT),
+            TextNode("example", TextType.LINK, "url"),
+            TextNode(" out", TextType.TEXT)
+        ]
+        self.assertEqual(processed_nodes, expected_nodes)
+
+    def test_no_images_or_links(self):
+        """This test case checks the split nodes and images link 
+        functions with no images or links"""
+        node = TextNode("Just plain text", TextType.TEXT)
+        node_list = [node]
+
+        processed_images = split_nodes_image(node_list)
+        processed_links = split_nodes_link(node_list)
+
+        self.assertEqual(processed_images, node_list)
+        self.assertEqual(processed_links, node_list)

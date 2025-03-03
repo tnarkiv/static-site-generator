@@ -55,3 +55,75 @@ def extract_markdown_links(text: str):
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
+
+
+def split_nodes_image(old_nodes: list[TextNode]):
+    """Splits text nodes containing images
+
+    Args:
+        old_nodes (list[TextNode]): List of text nodes to be processed
+
+    Returns:
+        list[TextNodes]: List of processed nodes split on found images
+    """
+    new_node_list: list[TextNode] = []
+    pattern = re.compile(r"(!\[([^\[\]]*)\]\(([^\(\)]*)\))")
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_node_list.append(node)
+            continue
+
+        last_index = 0
+        for match in pattern.finditer(node.text):
+            start, end = match.span()
+            alt_text, image_url = match.group(2), match.group(3)
+
+            if start > last_index:
+                new_node_list.append(
+                    TextNode(node.text[last_index:start], TextType.TEXT)
+                )
+
+            new_node_list.append(TextNode(alt_text, TextType.IMAGE, image_url))
+            last_index = end
+
+        if last_index < len(node.text):
+            new_node_list.append(TextNode(node.text[last_index:], TextType.TEXT))
+
+    return new_node_list
+
+
+def split_nodes_link(old_nodes: list[TextNode]):
+    """Splits text nodes containing links
+
+    Args:
+        old_nodes (list[TextNode]): List of text nodes to be processed
+
+    Returns:
+        list[TextNodes]: List of processed nodes split on found links
+    """
+    new_node_list: list[TextNode] = []
+    pattern = re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)")
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_node_list.append(node)
+            continue
+
+        last_index = 0
+        for match in pattern.finditer(node.text):
+            start, end = match.span()
+            link_text, link_url = match.group(1), match.group(2)
+
+            if start > last_index:
+                new_node_list.append(
+                    TextNode(node.text[last_index:start], TextType.TEXT)
+                )
+
+            new_node_list.append(TextNode(link_text, TextType.LINK, link_url))
+            last_index = end
+
+        if last_index < len(node.text):
+            new_node_list.append(TextNode(node.text[last_index:], TextType.TEXT))
+
+    return new_node_list
