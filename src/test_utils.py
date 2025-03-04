@@ -1,11 +1,13 @@
 """This module contains the test cases for testing the utils class"""
 
+import textwrap
 import unittest
 
 from textnode import TextNode, TextType
 from utils import (
     extract_markdown_images,
     extract_markdown_links,
+    markdown_to_blocks,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -242,3 +244,125 @@ class TestUtils(unittest.TestCase):
         result = text_to_textnodes(text)
         # Adjust this test based on how split_nodes_link works
         self.assertTrue(any(node.text_type == TextType.LINK for node in result))
+
+    def test_single_paragraph(self):
+        """Test that a single paragraph is correctly parsed into one block."""
+        md = "This is a single paragraph."
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["This is a single paragraph."])
+
+    def test_multiple_paragraphs(self):
+        """Test that multiple paragraphs are split into separate blocks."""
+        md = textwrap.dedent("""
+        This is the first paragraph.
+
+        This is the second paragraph.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["This is the first paragraph.", "This is the second paragraph."])
+
+    def test_paragraph_with_line_breaks(self):
+        """Test paragraphs with single newlines are treated as part of the same block."""
+        md = textwrap.dedent("""
+        This is the first line.
+        This is still the same paragraph.
+
+        Next paragraph starts here.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [
+            "This is the first line.\nThis is still the same paragraph.",
+            "Next paragraph starts here."
+        ])
+
+    def test_leading_and_trailing_whitespace(self):
+        """Test that leading and trailing whitespace is stripped."""
+        md = textwrap.dedent("""
+            
+            This has leading and trailing whitespace.     
+
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["This has leading and trailing whitespace."])
+
+    def test_list_items(self):
+        """Test that lists are treated as single blocks."""
+        md = textwrap.dedent("""
+        - Item 1
+        - Item 2
+
+        - Item 3
+        - Item 4
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["- Item 1\n- Item 2", "- Item 3\n- Item 4"])
+
+    def test_code_blocks(self):
+        """Test code blocks enclosed in triple backticks."""
+        md = textwrap.dedent("""
+        ```
+        def hello():
+            print("Hello, World!")
+        ```
+
+        Another paragraph.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [
+            "```\ndef hello():\n    print(\"Hello, World!\")\n```",
+            "Another paragraph."
+        ])
+
+    def test_mixed_content(self):
+        """Test paragraphs with bold, italics, code, and lists mixed together."""
+        md = textwrap.dedent("""
+        This is **bold** text.
+
+        Here is _italic_ text and `code`.
+
+        - List item 1
+        - List item 2
+
+        Another paragraph.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [
+            "This is **bold** text.",
+            "Here is _italic_ text and `code`.",
+            "- List item 1\n- List item 2",
+            "Another paragraph."
+        ])
+
+    def test_consecutive_newlines(self):
+        """Test paragraphs separated by more than two newlines."""
+        md = textwrap.dedent("""
+        Paragraph 1.
+
+
+        Paragraph 2.
+
+        Paragraph 3.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["Paragraph 1.", "Paragraph 2.", "Paragraph 3."])
+
+    def test_empty_input(self):
+        """Test that empty input returns an empty list."""
+        md = ""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [])
+
+    def test_only_whitespace(self):
+        """Test that input with only whitespace returns an empty list."""
+        md = "     \n    \n  "
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [])
+
+    def test_single_newline_within_paragraph(self):
+        """Test single newlines within paragraphs are preserved."""
+        md = textwrap.dedent("""
+        This is line 1.
+        This is line 2.
+        """)
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["This is line 1.\nThis is line 2."])
