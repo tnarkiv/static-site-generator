@@ -9,6 +9,7 @@ from utils import (
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
+    text_to_textnodes,
 )
 
 
@@ -144,7 +145,7 @@ class TestUtils(unittest.TestCase):
             TextNode("alt text", TextType.IMAGE, "image_url"),
             TextNode("This is ", TextType.TEXT),
             TextNode("an image", TextType.IMAGE, "url"),
-            TextNode(" in text", TextType.TEXT)
+            TextNode(" in text", TextType.TEXT),
         ]
         self.assertEqual(processed_nodes, expected_nodes)
 
@@ -159,12 +160,12 @@ class TestUtils(unittest.TestCase):
             TextNode("link text", TextType.LINK, "link_url"),
             TextNode("Check this ", TextType.TEXT),
             TextNode("example", TextType.LINK, "url"),
-            TextNode(" out", TextType.TEXT)
+            TextNode(" out", TextType.TEXT),
         ]
         self.assertEqual(processed_nodes, expected_nodes)
 
     def test_no_images_or_links(self):
-        """This test case checks the split nodes and images link 
+        """This test case checks the split nodes and images link
         functions with no images or links"""
         node = TextNode("Just plain text", TextType.TEXT)
         node_list = [node]
@@ -174,3 +175,70 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(processed_images, node_list)
         self.assertEqual(processed_links, node_list)
+
+    def setUp(self):
+        self.text_types = TextType
+
+    def test_plain_text_to_textnode(self):
+        """Test conversion of plain text to textnode objects"""
+        text = "Just plain text."
+        result = text_to_textnodes(text)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].text, text)
+        self.assertEqual(result[0].text_type, self.text_types.TEXT)
+
+    def test_bold_text_to_textnode(self):
+        """Test conversion of bold text to textnode objects"""
+        text = "This is **bold** text."
+        result = text_to_textnodes(text)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[1].text, "bold")
+        self.assertEqual(result[1].text_type, self.text_types.BOLD)
+
+    def test_italics_text_to_textnode(self):
+        """Test conversion of italic text to textnode objects"""
+        text = "This is _italic_ text."
+        result = text_to_textnodes(text)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[1].text, "italic")
+        self.assertEqual(result[1].text_type, self.text_types.ITALICS)
+
+    def test_code_text_to_textnode(self):
+        """Test conversion of code text to textnode objects"""
+        text = "This is `code` text."
+        result = text_to_textnodes(text)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[1].text, "code")
+        self.assertEqual(result[1].text_type, self.text_types.CODE)
+
+    def test_mixed_formatting_to_textnode(self):
+        """Test conversion of mixed text to textnode objects"""
+        text = "**Bold** and _italic_ and `code`."
+        result = text_to_textnodes(text)
+        self.assertEqual(len(result), 6)
+        self.assertEqual(result[0].text, "Bold")
+        self.assertEqual(result[0].text_type, self.text_types.BOLD)
+        self.assertEqual(result[1].text, " and ")
+        self.assertEqual(result[1].text_type, self.text_types.TEXT)
+        self.assertEqual(result[2].text, "italic")
+        self.assertEqual(result[2].text_type, self.text_types.ITALICS)
+        self.assertEqual(result[3].text, " and ")
+        self.assertEqual(result[3].text_type, self.text_types.TEXT)
+        self.assertEqual(result[4].text, "code")
+        self.assertEqual(result[4].text_type, self.text_types.CODE)
+        self.assertEqual(result[5].text, ".")
+        self.assertEqual(result[5].text_type, self.text_types.TEXT)
+
+    def test_image_to_textnode(self):
+        """Test conversion of images to textnode objects"""
+        text = "This is an ![image](url)."
+        result = text_to_textnodes(text)
+        # Adjust this test based on how split_nodes_image works
+        self.assertTrue(any(node.text_type == TextType.IMAGE for node in result))
+
+    def test_link_to_textnode(self):
+        """Test conversion of links to textnode objects"""
+        text = "This is a [link](url)."
+        result = text_to_textnodes(text)
+        # Adjust this test based on how split_nodes_link works
+        self.assertTrue(any(node.text_type == TextType.LINK for node in result))

@@ -127,3 +127,23 @@ def split_nodes_link(old_nodes: list[TextNode]):
             new_node_list.append(TextNode(node.text[last_index:], TextType.TEXT))
 
     return new_node_list
+
+
+def text_to_textnodes(text: str):
+    """Converts a raw string of markdown-flavored text into a list of TextNode objects
+
+    Args:
+        text (str): Markdown text
+
+    Returns:
+        List(TextNode): Textnodes created from Markdown text
+    """
+    nodes_list = [TextNode(text, TextType.TEXT)]
+    delimiters = [("**", TextType.BOLD), ("_", TextType.ITALICS), ("`", TextType.CODE)]
+
+    for delimiter, text_type in delimiters:
+        nodes_list = split_nodes_delimiter(nodes_list, delimiter, text_type)
+
+    for split_func in [split_nodes_image, split_nodes_link]:
+        nodes_list = split_func(nodes_list)
+    return nodes_list
