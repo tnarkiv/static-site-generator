@@ -1,22 +1,5 @@
 """Contains code for rendering text nodes"""
 
-from enum import Enum
-
-
-class TextType(Enum):
-    """Enum for managing text types
-
-    Args:
-        Enum (Enum): base class Enum
-    """
-
-    TEXT = "text"
-    BOLD = "bold"
-    ITALICS = "italic"
-    CODE = "code"
-    LINK = "link"
-    IMAGE = "image"
-
 
 class TextNode:
     """Text node class"""

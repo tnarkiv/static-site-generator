@@ -1,7 +1,8 @@
 """This file contains code for converting text nodes to HTML Nodes"""
 
 from leafnode import LeafNode
-from textnode import TextNode, TextType
+from textnode import TextNode
+from enums import TextType
 
 
 def text_node_to_html_node(text_node: TextNode):

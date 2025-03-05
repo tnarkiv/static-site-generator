@@ -2,7 +2,8 @@
 
 import unittest
 
-from textnode import TextNode, TextType
+from textnode import TextNode
+from enums import TextType
 
 
 class TestTextNode(unittest.TestCase):

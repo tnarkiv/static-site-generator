@@ -3,7 +3,8 @@
 import unittest
 
 from text_to_html_node import text_node_to_html_node
-from textnode import TextNode, TextType
+from textnode import TextNode
+from enums import TextType
 
 
 class TestTextToHTMLNode(unittest.TestCase):

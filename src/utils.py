@@ -1,7 +1,8 @@
 """This file contains the util functions used in the project"""
 
 import re
-from textnode import TextNode, TextType
+from textnode import TextNode
+from enums import BlockType, TextType
 
 
 def split_nodes_delimiter(
@@ -160,3 +161,35 @@ def markdown_to_blocks(text: str):
     """
     blocks = [block.strip() for block in text.split("\n\n") if block.strip()]
     return blocks
+
+
+def block_to_block_type(block: str):
+    """
+    Determines the type of a markdown block.
+
+    Args:
+        block (str): A single block of markdown text with leading and trailing whitespace removed.
+
+    Returns:
+        BlockType: The type of the markdown block.
+    """
+    lines = block.split("\n")
+
+    if block.startswith("# ") or any(
+        block.startswith(f"{'#' * i} ") for i in range(1, 7)
+    ):
+        return BlockType.HEADING
+
+    if block.startswith("```") and block.endswith("```"):
+        return BlockType.CODE
+
+    if all(line.startswith(">") for line in lines):
+        return BlockType.QUOTE
+
+    if all(line.startswith("- ") for line in lines):
+        return BlockType.UNORDERED_LIST
+
+    if all(line.lstrip().startswith(f"{i}. ") for i, line in enumerate(lines, start=1)):
+        return BlockType.ORDERED_LIST
+
+    return BlockType.PARAGRAPH
