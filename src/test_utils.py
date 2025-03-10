@@ -481,6 +481,8 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(blocks, ["This is line 1.\nThis is line 2."])
 
     def test_paragraphs(self):
+        """Tests markdown to html nodes with paragraphs
+        """
         md = textwrap.dedent("""
             This is **bolded** paragraph text in a p tag here
 
@@ -498,6 +500,8 @@ class TestUtils(unittest.TestCase):
         )
 
     def test_codeblock(self):
+        """Tests markdown to html node with code blocks
+        """
         md = textwrap.dedent("""
         ```
         This is text that _should_ remain
