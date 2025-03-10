@@ -9,6 +9,7 @@ from utils import (
     extract_markdown_images,
     extract_markdown_links,
     markdown_to_blocks,
+    markdown_to_html_node,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -254,69 +255,88 @@ class TestUtils(unittest.TestCase):
 
     def test_multiple_paragraphs_block(self):
         """Test that multiple paragraphs are split into separate blocks."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is the first paragraph.
 
         This is the second paragraph.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, ["This is the first paragraph.", "This is the second paragraph."])
+        self.assertEqual(
+            blocks, ["This is the first paragraph.", "This is the second paragraph."]
+        )
 
     def test_paragraph_with_line_breaks_block(self):
         """Test paragraphs with single newlines are treated as part of the same block."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is the first line.
         This is still the same paragraph.
 
         Next paragraph starts here.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, [
-            "This is the first line.\nThis is still the same paragraph.",
-            "Next paragraph starts here."
-        ])
+        self.assertEqual(
+            blocks,
+            [
+                "This is the first line.\nThis is still the same paragraph.",
+                "Next paragraph starts here.",
+            ],
+        )
 
     def test_leading_and_trailing_whitespace_block(self):
         """Test that leading and trailing whitespace is stripped."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
             
             This has leading and trailing whitespace.     
 
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["This has leading and trailing whitespace."])
 
     def test_list_items_block(self):
         """Test that lists are treated as single blocks."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         - Item 1
         - Item 2
 
         - Item 3
         - Item 4
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["- Item 1\n- Item 2", "- Item 3\n- Item 4"])
 
     def test_code_blocks(self):
         """Test code blocks enclosed in triple backticks."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         ```
         def hello():
             print("Hello, World!")
         ```
 
         Another paragraph.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, [
-            "```\ndef hello():\n    print(\"Hello, World!\")\n```",
-            "Another paragraph."
-        ])
+        self.assertEqual(
+            blocks,
+            [
+                '```\ndef hello():\n    print("Hello, World!")\n```',
+                "Another paragraph.",
+            ],
+        )
 
     def test_mixed_content(self):
         """Test paragraphs with bold, italics, code, and lists mixed together."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is **bold** text.
 
         Here is _italic_ text and `code`.
@@ -325,25 +345,31 @@ class TestUtils(unittest.TestCase):
         - List item 2
 
         Another paragraph.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, [
-            "This is **bold** text.",
-            "Here is _italic_ text and `code`.",
-            "- List item 1\n- List item 2",
-            "Another paragraph."
-        ])
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bold** text.",
+                "Here is _italic_ text and `code`.",
+                "- List item 1\n- List item 2",
+                "Another paragraph.",
+            ],
+        )
 
     def test_consecutive_newlines(self):
         """Test paragraphs separated by more than two newlines."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         Paragraph 1.
 
 
         Paragraph 2.
 
         Paragraph 3.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["Paragraph 1.", "Paragraph 2.", "Paragraph 3."])
 
@@ -361,32 +387,40 @@ class TestUtils(unittest.TestCase):
 
     def test_single_newline_within_paragraph(self):
         """Test single newlines within paragraphs are preserved."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is line 1.
         This is line 2.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["This is line 1.\nThis is line 2."])
 
     def test_code_blocks_block(self):
         """Test code blocks enclosed in triple backticks."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         ```
         def hello():
             print("Hello, World!")
         ```
 
         Another paragraph.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, [
-            "```\ndef hello():\n    print(\"Hello, World!\")\n```",
-            "Another paragraph."
-        ])
+        self.assertEqual(
+            blocks,
+            [
+                '```\ndef hello():\n    print("Hello, World!")\n```',
+                "Another paragraph.",
+            ],
+        )
 
     def test_mixed_content_block(self):
         """Test paragraphs with bold, italics, code, and lists mixed together."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is **bold** text.
 
         Here is _italic_ text and `code`.
@@ -395,25 +429,31 @@ class TestUtils(unittest.TestCase):
         - List item 2
 
         Another paragraph.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
-        self.assertEqual(blocks, [
-            "This is **bold** text.",
-            "Here is _italic_ text and `code`.",
-            "- List item 1\n- List item 2",
-            "Another paragraph."
-        ])
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bold** text.",
+                "Here is _italic_ text and `code`.",
+                "- List item 1\n- List item 2",
+                "Another paragraph.",
+            ],
+        )
 
     def test_consecutive_newlines_block(self):
         """Test paragraphs separated by more than two newlines."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         Paragraph 1.
 
 
         Paragraph 2.
 
         Paragraph 3.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["Paragraph 1.", "Paragraph 2.", "Paragraph 3."])
 
@@ -431,9 +471,45 @@ class TestUtils(unittest.TestCase):
 
     def test_single_newline_within_paragraph_block(self):
         """Test single newlines within paragraphs are preserved."""
-        md = textwrap.dedent("""
+        md = textwrap.dedent(
+            """
         This is line 1.
         This is line 2.
-        """)
+        """
+        )
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, ["This is line 1.\nThis is line 2."])
+
+    def test_paragraphs(self):
+        md = textwrap.dedent("""
+            This is **bolded** paragraph text in a p tag here
+
+            This is another paragraph with _italic_ text and `code` here
+
+            """
+        )
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>"
+            "This is another paragraph with <i>italic</i> text and "
+            "<code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = textwrap.dedent("""
+        ```
+        This is text that _should_ remain
+        the **same** even with inline stuff
+        ```
+        """)
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\n"
+            "the **same** even with inline stuff\n"
+            "</code></pre></div>",
+        )

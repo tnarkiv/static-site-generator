@@ -1,6 +1,9 @@
 """This file contains the util functions used in the project"""
 
 import re
+from htmlnode import HTMLNode
+from leafnode import LeafNode
+from parentnode import ParentNode
 from textnode import TextNode
 from enums import BlockType, TextType
 
@@ -193,3 +196,80 @@ def block_to_block_type(block: str):
         return BlockType.ORDERED_LIST
 
     return BlockType.PARAGRAPH
+
+
+def markdown_to_html_node(markdown: str) -> HTMLNode:
+    """
+    Converts a markdown string into an HTMLNode tree structure.
+
+    Args:
+        markdown (str): The markdown content to be converted.
+
+    Returns:
+        HTMLNode: The root node containing all block-level elements.
+    """
+    blocks = markdown_to_blocks(markdown)
+    parent_node = ParentNode(tag="div", children=[])
+
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        block_node = None
+
+        if block_type == BlockType.PARAGRAPH:
+            block_node = ParentNode(tag="p", children=text_to_children(block))
+        elif block_type == BlockType.HEADING:
+            heading_level = min(block.count("#"), 6)
+            block_node = ParentNode(
+                tag=f"h{heading_level}", children=text_to_children(block.lstrip("# "))
+            )
+        elif block_type == BlockType.CODE:
+            code_lines = block.splitlines()[1:-1]
+            code_text = "\n".join(code_lines) + "\n"
+            code_node = LeafNode(tag="code", value=code_text)
+            block_node = ParentNode(tag="pre", children=[code_node])
+        elif block_type == BlockType.QUOTE:
+            quote_text = "\n".join(line.lstrip("> ") for line in block.splitlines())
+            block_node = ParentNode(
+                tag="blockquote", children=text_to_children(quote_text)
+            )
+        elif block_type == BlockType.UNORDERED_LIST:
+            items = [line.lstrip("- ") for line in block.splitlines()]
+            list_items = [
+                ParentNode(tag="li", children=text_to_children(item)) for item in items
+            ]
+            block_node = ParentNode(tag="ul", children=list_items)
+        elif block_type == BlockType.ORDERED_LIST:
+            items = [line.split(". ", 1)[1] for line in block.splitlines()]
+            list_items = [
+                ParentNode(tag="li", children=text_to_children(item)) for item in items
+            ]
+            block_node = ParentNode(tag="ol", children=list_items)
+
+        if block_node:
+            parent_node.children.append(block_node)
+
+    return parent_node
+
+
+def text_to_children(text: str) -> list[HTMLNode]:
+    """
+    Converts a text string into a list of HTMLNodes representing inline markdown.
+
+    Args:
+        text (str): The input text string with possible inline markdown.
+
+    Returns:
+        list[HTMLNode]: A list of HTMLNodes representing parsed inline elements.
+    """
+    nodes = []
+    text_nodes = text_to_textnodes(text)
+    for node in text_nodes:
+        tag = None
+        if node.text_type == TextType.BOLD:
+            tag = "b"
+        elif node.text_type == TextType.ITALICS:
+            tag = "i"
+        elif node.text_type == TextType.CODE:
+            tag = "code"
+        nodes.append(LeafNode(tag=tag, value=node.text))
+    return nodes

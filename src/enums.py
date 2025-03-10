@@ -25,9 +25,9 @@ class BlockType(Enum):
         Enum (Enum): Base class Enum
     """
 
-    PARAGRAPH = "paragraph"
-    HEADING = "heading"
+    PARAGRAPH = "p"
+    HEADING = "h"
     CODE = "code"
-    QUOTE = "quote"
-    UNORDERED_LIST = "unordered list"
-    ORDERED_LIST = "ordered list"
+    QUOTE = "q"
+    UNORDERED_LIST = "ul"
+    ORDERED_LIST = "ol"
