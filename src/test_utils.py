@@ -8,6 +8,7 @@ from enums import TextType
 from utils import (
     extract_markdown_images,
     extract_markdown_links,
+    extract_title,
     markdown_to_blocks,
     markdown_to_html_node,
     split_nodes_delimiter,
@@ -517,3 +518,59 @@ class TestUtils(unittest.TestCase):
             "the **same** even with inline stuff\n"
             "</code></pre></div>",
         )
+
+    def test_single_word_title(self):
+        """Tests extract title with single word title
+        """
+        markdown = "# Title"
+        self.assertEqual(extract_title(markdown), "Title")
+
+    def test_multi_word_title(self):
+        """Tests extract title with multi word title
+        """
+        markdown = "#  This is a Title "
+        self.assertEqual(extract_title(markdown), "This is a Title")
+
+    def test_title_with_extra_spaces(self):
+        """Tests extract title with extra spaces
+        """
+        markdown = "#    Trimmed Title    "
+        self.assertEqual(extract_title(markdown), "Trimmed Title")
+
+    def test_no_h1_header(self):
+        """Tests extract title with no H1 header
+        """
+        markdown = "## Not a Title\nSome text here"
+        with self.assertRaises(ValueError) as context:
+            extract_title(markdown)
+        self.assertEqual(str(context.exception), "No title found")
+
+    def test_h1_among_other_headers(self):
+        """Tests extract title with multiple headers
+        """
+        markdown = """
+        ## Subtitle
+        # Main Title
+        ### Another Subtitle
+        """
+        self.assertEqual(extract_title(markdown), "Main Title")
+
+    def test_only_h1_with_no_text(self):
+        """Tests extract title with empty header
+        """
+        markdown = "#  "
+        self.assertEqual(extract_title(markdown), "")
+
+    def test_h1_with_inline_markdown(self):
+        """Tests extract title with header in inline markdown
+        """
+        markdown = "# **Bold Title**"
+        self.assertEqual(extract_title(markdown), "**Bold Title**")
+
+    def test_empty_input_extract_title(self):
+        """Tests extract title with empty markdown
+        """
+        markdown = ""
+        with self.assertRaises(ValueError) as context:
+            extract_title(markdown)
+        self.assertEqual(str(context.exception), "No title found")

@@ -1,13 +1,13 @@
 """Main module of the project"""
+
 from copy_directory import copy_directory_recursive
-from textnode import TextNode
-from enums import TextType
+from generate_page import generate_pages_recursive
+
 
 def main():
-    """Main function
-    """
-    test_node = TextNode("This is a text node", TextType.BOLD, "https://www.boot.dev")
-    print(test_node)
-    copy_directory_recursive('static', 'public')
+    """Main function"""
+    copy_directory_recursive("static", "public")
+    generate_pages_recursive("content", "template.html", "public")
+
 
 main()

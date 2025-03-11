@@ -263,13 +263,44 @@ def text_to_children(text: str) -> list[HTMLNode]:
     """
     nodes = []
     text_nodes = text_to_textnodes(text)
+    text_nodes = split_nodes_image(text_nodes)
+    text_nodes = split_nodes_link(text_nodes)
+
     for node in text_nodes:
         tag = None
+        props = None
         if node.text_type == TextType.BOLD:
             tag = "b"
         elif node.text_type == TextType.ITALICS:
             tag = "i"
         elif node.text_type == TextType.CODE:
             tag = "code"
-        nodes.append(LeafNode(tag=tag, value=node.text))
+        elif node.text_type == TextType.LINK:
+            tag = "a"
+            props = {"href": node.url}
+        elif node.text_type == TextType.IMAGE:
+            tag = "img"
+            props = {"src": node.url, "alt": node.text}
+
+        nodes.append(LeafNode(tag=tag, value=node.text, props=props))
     return nodes
+
+
+def extract_title(markdown: str) -> str:
+    """Extracts title string from markdown
+
+    Args:
+        markdown (str): The input text markdown
+
+    Raises:
+        ValueError: Raised when given markdown text doesn't contain a H1 header (title)
+
+    Returns:
+        str: Title string
+    """
+    lines = markdown.split("\n")
+    for line in lines:
+        words = line.strip().split()
+        if words and words[0] == "#":
+            return " ".join(words[1:])
+    raise ValueError("No title found")
