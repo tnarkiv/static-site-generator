@@ -5,7 +5,7 @@ import os
 from utils import extract_title, markdown_to_html_node
 
 
-def generate_page(from_path: str, template_path: str, dest_path: str):
+def generate_page(from_path: str, template_path: str, dest_path: str, basepath: str):
     """
     Generates an HTML page from a markdown file and template.
 
@@ -13,6 +13,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
         from_path (str): Path to the source markdown file.
         template_path (str): Path to the HTML template file.
         dest_path (str): Path to the destination HTML file.
+        basepath (str): The base path for URLs.
     """
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
@@ -29,6 +30,8 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 
     final_content = template_content.replace("{{ Title }}", title)
     final_content = final_content.replace("{{ Content }}", html_content)
+    final_content = final_content.replace('href="/', f'href="{basepath}')
+    final_content = final_content.replace('src="/', f'src="{basepath}')
 
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
 
@@ -39,7 +42,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 
 
 def generate_pages_recursive(
-    dir_path_content: str, template_path: str, dest_dir_path: str
+    dir_path_content: str, template_path: str, dest_dir_path: str, basepath : str
 ):
     """
     Recursively generates HTML pages from markdown files.
@@ -48,6 +51,7 @@ def generate_pages_recursive(
         dir_path_content (str): Path to the content directory containing markdown files.
         template_path (str): Path to the HTML template file.
         dest_dir_path (str): Path to the destination directory for generated HTML files.
+        basepath (str): The base path for URLs.
     """
     for root, _, files in os.walk(dir_path_content):
         for file in files:
@@ -59,5 +63,5 @@ def generate_pages_recursive(
                 )
 
                 os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                generate_page(from_path, template_path, dest_path)
+                generate_page(from_path, template_path, dest_path, basepath)
                 print(f"Generated page: {dest_path}")
